@@ -4,33 +4,23 @@ import { checkPurchasePolicy } from "@/lib/purchase-policy";
 
 export async function POST(request: Request) {
   try {
-    const { sku, price, approved } = await request.json();
+    const { sku, price, approved, productName, query, category } = await request.json();
 
     if (!sku || typeof price !== "number") {
-      return NextResponse.json(
-        { error: "SKU and price are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "SKU and price are required" }, { status: 400 });
     }
 
     if (approved !== true) {
       return NextResponse.json(
-        {
-          error: "Human approval is required before creating a payment order.",
-        },
+        { error: "Human approval is required before creating a payment order." },
         { status: 403 }
       );
     }
 
-    // Always check the spending policy again on the server.
     const policy = checkPurchasePolicy(price);
-
     if (!policy.allowed) {
       return NextResponse.json(
-        {
-          error: policy.reason,
-          purchase_allowed: false,
-        },
+        { error: policy.reason, purchase_allowed: false },
         { status: 403 }
       );
     }
@@ -38,9 +28,12 @@ export async function POST(request: Request) {
     const order = await razorpay.orders.create({
       amount: price * 100,
       currency: "INR",
-      receipt: `receipt_${Date.now()}`,
+      receipt: `rcpt_${Date.now()}`,
       notes: {
         sku,
+        productName: productName || sku,
+        query: query || "",
+        category: category || "General",
       },
     });
 
@@ -50,10 +43,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error(error);
-
-    return NextResponse.json(
-      { error: "Failed to create Razorpay order" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create Razorpay order" }, { status: 500 });
   }
 }
