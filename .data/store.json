@@ -1,6 +1,63 @@
 {
   "transactions": [
     {
+      "orderId": "BLOCKED_1787589829339",
+      "paymentId": "BLOCKED_1787589829339",
+      "signature": "EXECUTION_HALTED",
+      "sku": "BAG-001",
+      "productName": "Waterproof Laptop Backpack",
+      "category": "Backpacks",
+      "amount": 1499,
+      "currency": "INR",
+      "query": "Find me a waterproof laptop backpack under ₹1,000",
+      "agentId": "agent_live",
+      "policyResult": "Blocked",
+      "policyReason": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "approvalStatus": "Not required",
+      "paymentStatus": "Not created",
+      "status": "Policy Blocked",
+      "id": "TXN-2026-00008",
+      "createdAt": "2026-08-24T16:43:49.386Z"
+    },
+    {
+      "orderId": "BLOCKED_1787589770118",
+      "paymentId": "BLOCKED_1787589770118",
+      "signature": "EXECUTION_HALTED",
+      "sku": "BAG-001",
+      "productName": "Waterproof Laptop Backpack",
+      "category": "Backpacks",
+      "amount": 1499,
+      "currency": "INR",
+      "query": "Find me a waterproof laptop backpack under ₹1,000",
+      "agentId": "agent_live",
+      "policyResult": "Blocked",
+      "policyReason": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "approvalStatus": "Not required",
+      "paymentStatus": "Not created",
+      "status": "Policy Blocked",
+      "id": "TXN-2026-00007",
+      "createdAt": "2026-08-24T16:42:50.141Z"
+    },
+    {
+      "orderId": "order_TSWWT6Hm8ONzh3",
+      "paymentId": "pay_TSWWZaRqm5dQLK",
+      "signature": "6099f35bdb0ff511d0fe69952f774bb9cc30f0774014182cc960e2330300af76",
+      "sku": "BAG-002",
+      "productName": "Premium Laptop Backpack",
+      "category": "Backpacks",
+      "amount": 1899,
+      "currency": "INR",
+      "query": "Find me a waterproof laptop backpack under ₹2,000",
+      "agentId": "agent_live",
+      "policyResult": "Passed",
+      "policyReason": "Within verified spending limit",
+      "approvalStatus": "Approved",
+      "paymentStatus": "Paid",
+      "status": "Completed",
+      "id": "TXN-2026-00006",
+      "createdAt": "2026-08-21T18:46:30.678Z"
+    },
+    {
       "orderId": "order_TSWJlmKeh3N0W7",
       "paymentId": "pay_TSWJpqRVnzH8Sv",
       "signature": "3f2e59423dffb379c6009393872c04e4bae1c9cd0eb4b3a76f11ce11d8be5b56",
@@ -97,6 +154,85 @@
     }
   ],
   "activities": [
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Blocked",
+      "request": "Find me a waterproof laptop backpack under ₹1,000",
+      "productMatched": "Waterproof Laptop Backpack",
+      "productsReturned": 2,
+      "amount": 1499,
+      "policy": "Blocked",
+      "resultText": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "reason": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "id": "ACT-29332",
+      "createdAt": "2026-08-24T16:43:49.332Z"
+    },
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Discovery",
+      "request": "Find me a waterproof laptop backpack under ₹2,000",
+      "productMatched": "Waterproof Laptop Backpack",
+      "productsReturned": 2,
+      "amount": 1499,
+      "policy": "Passed",
+      "resultText": "2 product(s) discovered",
+      "id": "ACT-91185",
+      "createdAt": "2026-08-24T16:43:11.185Z"
+    },
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Blocked",
+      "request": "Find me a waterproof laptop backpack under ₹1,000",
+      "productMatched": "Waterproof Laptop Backpack",
+      "productsReturned": 2,
+      "amount": 1499,
+      "policy": "Blocked",
+      "resultText": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "reason": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "id": "ACT-70114",
+      "createdAt": "2026-08-24T16:42:50.114Z"
+    },
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Discovery",
+      "request": "Find me a waterproof laptop backpack under ₹2,000",
+      "productMatched": "Waterproof Laptop Backpack",
+      "productsReturned": 2,
+      "amount": 1499,
+      "policy": "Passed",
+      "resultText": "2 product(s) discovered",
+      "id": "ACT-61755",
+      "createdAt": "2026-08-24T16:42:41.755Z"
+    },
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Purchase",
+      "request": "Find me a waterproof laptop backpack under ₹2,000",
+      "productMatched": "Premium Laptop Backpack",
+      "amount": 1899,
+      "policy": "Passed",
+      "resultText": "Payment captured (pay_TSWWZaRqm5dQLK)",
+      "id": "ACT-90728",
+      "createdAt": "2026-08-21T18:46:30.728Z"
+    },
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Discovery",
+      "request": "Find me a waterproof laptop backpack under ₹2,000",
+      "productMatched": "Waterproof Laptop Backpack",
+      "productsReturned": 2,
+      "amount": 1499,
+      "policy": "Passed",
+      "resultText": "2 product(s) discovered",
+      "id": "ACT-65402",
+      "createdAt": "2026-08-21T18:46:05.402Z"
+    },
     {
       "agentName": "AI Buyer",
       "agentId": "agent_live",
@@ -278,7 +414,7 @@
       "createdAt": "2026-08-21T18:11:11.161Z"
     }
   ],
-  "totalQueries": 15,
-  "totalProductsDiscovered": 9,
-  "totalPolicyChecks": 10
+  "totalQueries": 21,
+  "totalProductsDiscovered": 19,
+  "totalPolicyChecks": 16
 }

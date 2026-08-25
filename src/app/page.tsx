@@ -24,6 +24,7 @@ interface Product {
   stock: number;
   purchase_allowed: boolean;
   policy_reason: string;
+  buyer_budget?: number | null;
 }
 
 interface PaymentSuccess {
@@ -117,6 +118,11 @@ export default function Home() {
   /* Purchase & Payment Flow */
   const approvePurchase = async () => {
     if (!selectedProduct) return;
+    if (!selectedProduct.purchase_allowed) {
+      alert(`Cannot proceed: ${selectedProduct.policy_reason}`);
+      return;
+    }
+
     setApprovalLoading(true);
 
     try {
@@ -130,6 +136,9 @@ export default function Home() {
           sku: selectedProduct.sku,
           price: selectedProduct.price,
           approved: true,
+          buyerBudget: selectedProduct.buyer_budget,
+          stock: selectedProduct.stock,
+          purchaseAllowed: selectedProduct.purchase_allowed,
         }),
       });
 
@@ -141,7 +150,7 @@ export default function Home() {
         );
       }
 
-      // 2. Order Creation
+      // 2. Order Creation (Protected server-side)
       const orderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -154,6 +163,9 @@ export default function Home() {
           productName: selectedProduct.name,
           query: query || DEFAULT_QUERY,
           category: selectedProduct.category,
+          buyerBudget: selectedProduct.buyer_budget,
+          stock: selectedProduct.stock,
+          purchaseAllowed: selectedProduct.purchase_allowed,
         }),
       });
 
@@ -277,6 +289,7 @@ export default function Home() {
         attributes: product.attributes,
         stock: product.stock,
         purchase_allowed: product.purchase_allowed,
+        policy_reason: product.policy_reason,
       },
       null,
       2
@@ -561,14 +574,24 @@ export default function Home() {
           {!products.length && !loading && (
             <div className="mx-auto mt-5 flex max-w-4xl flex-wrap justify-center gap-2">
               <button
-                onClick={() => searchProducts(DEFAULT_QUERY)}
+                onClick={() => searchProducts("Find me a waterproof laptop backpack under ₹2,000")}
                 className={`rounded-full border px-4 py-2 text-xs transition ${
                   darkMode
                     ? "border-white/10 text-slate-500 hover:bg-white/[0.04]"
                     : "border-slate-200 text-slate-500 hover:bg-slate-100"
                 }`}
               >
-                Try the backpack example →
+                Try: Backpack under ₹2,000 (Pass) →
+              </button>
+              <button
+                onClick={() => searchProducts("Find me a laptop backpack under ₹1,000")}
+                className={`rounded-full border px-4 py-2 text-xs transition ${
+                  darkMode
+                    ? "border-white/10 text-rose-400/80 hover:bg-white/[0.04]"
+                    : "border-rose-200 text-rose-600 hover:bg-rose-50"
+                }`}
+              >
+                Try: Backpack under ₹1,000 (Budget Block) →
               </button>
             </div>
           )}
@@ -664,7 +687,7 @@ export default function Home() {
                             ₹{product.price.toLocaleString("en-IN")}
                           </p>
                           <p className="mt-1 text-xs text-slate-500">
-                            {product.stock} in stock
+                            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
                           </p>
                         </div>
                       </div>
@@ -709,22 +732,22 @@ export default function Home() {
                               Product attributes
                             </p>
                             <div className="flex flex-wrap gap-2">
-                              {product.attributes.waterproof && (
+                              {product.attributes?.waterproof && (
                                 <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3 py-1.5 text-xs text-emerald-400">
                                   ✓ Waterproof
                                 </span>
                               )}
-                              {product.attributes.laptop_size && (
+                              {product.attributes?.laptop_size && (
                                 <span className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">
                                   {product.attributes.laptop_size}
                                 </span>
                               )}
-                              {product.attributes.material && (
+                              {product.attributes?.material && (
                                 <span className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">
                                   {product.attributes.material}
                                 </span>
                               )}
-                              {product.attributes.capacity_liters && (
+                              {product.attributes?.capacity_liters && (
                                 <span className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">
                                   {product.attributes.capacity_liters}L
                                 </span>
@@ -746,7 +769,7 @@ export default function Home() {
                               <div className="flex justify-between">
                                 <span className="text-slate-500">Waterproof</span>
                                 <span className="text-emerald-400">
-                                  {product.attributes.waterproof ? "true" : "false"}
+                                  {product.attributes?.waterproof ? "true" : "false"}
                                 </span>
                               </div>
                               <div className="flex justify-between">
@@ -755,7 +778,13 @@ export default function Home() {
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-slate-500">Purchase</span>
-                                <span className="text-emerald-400">
+                                <span
+                                  className={
+                                    product.purchase_allowed
+                                      ? "text-emerald-400"
+                                      : "text-rose-400"
+                                  }
+                                >
                                   {product.purchase_allowed ? "allowed" : "blocked"}
                                 </span>
                               </div>
@@ -792,47 +821,90 @@ export default function Home() {
                         </div>
 
                         <div className="mt-4 grid gap-2 text-xs text-slate-500">
-                          {product.attributes.waterproof && (
+                          {product.attributes?.waterproof && (
                             <div>✓ Matches waterproof requirement</div>
                           )}
-                          {product.attributes.laptop_size && (
+                          {product.attributes?.laptop_size && (
                             <div>
                               ✓ Supports {product.attributes.laptop_size} laptop
                             </div>
                           )}
                           <div>
-                            ✓ ₹{remaining.toLocaleString("en-IN")} below spending limit
+                            ✓ ₹{remaining.toLocaleString("en-IN")} below merchant ceiling
                           </div>
-                          <div>✓ {product.stock} units currently available</div>
+                          <div>
+                            {product.stock > 0
+                              ? `✓ ${product.stock} units currently available`
+                              : "× Out of stock"}
+                          </div>
                         </div>
                       </div>
 
-                      {/* Policy Approval Box */}
+                      {/* Policy Approval/Block Box */}
                       <div
                         className={`mt-4 rounded-2xl border p-5 ${
-                          darkMode
-                            ? "border-emerald-400/15 bg-emerald-400/[0.035]"
-                            : "border-emerald-200 bg-emerald-50"
+                          product.purchase_allowed
+                            ? darkMode
+                              ? "border-emerald-400/15 bg-emerald-400/[0.035]"
+                              : "border-emerald-200 bg-emerald-50"
+                            : darkMode
+                            ? "border-rose-400/15 bg-rose-400/[0.035]"
+                            : "border-rose-200 bg-rose-50"
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/10 text-xs text-emerald-400">
-                              ✓
+                            <span
+                              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                                product.purchase_allowed
+                                  ? "bg-emerald-400/10 text-emerald-400"
+                                  : "bg-rose-400/10 text-rose-400"
+                              }`}
+                            >
+                              {product.purchase_allowed ? "✓" : "×"}
                             </span>
-                            <span className="text-sm font-medium text-emerald-400">
-                              Policy approved
+                            <span
+                              className={`text-sm font-medium ${
+                                product.purchase_allowed
+                                  ? "text-emerald-400"
+                                  : "text-rose-400"
+                              }`}
+                            >
+                              {product.purchase_allowed
+                                ? "Policy approved"
+                                : "Policy blocked"}
                             </span>
                           </div>
                           <span className="text-xs text-slate-500">
-                            ₹2,000 limit
+                            {product.buyer_budget
+                              ? `Budget: ₹${product.buyer_budget}`
+                              : "₹2,000 limit"}
                           </span>
                         </div>
+
+                        {/* Explicit Policy Evaluation Reason */}
+                        <p
+                          className={`mt-3 text-xs leading-relaxed font-mono ${
+                            product.purchase_allowed
+                              ? darkMode
+                                ? "text-emerald-400/80"
+                                : "text-emerald-700"
+                              : darkMode
+                              ? "text-rose-400"
+                              : "text-rose-700"
+                          }`}
+                        >
+                          {product.policy_reason}
+                        </p>
 
                         <div className="mt-4">
                           <div className="mb-2 flex justify-between text-[11px] text-slate-500">
                             <span>₹{product.price.toLocaleString("en-IN")}</span>
-                            <span>₹2,000</span>
+                            <span>
+                              {product.buyer_budget
+                                ? `Max: ₹${product.buyer_budget}`
+                                : "Ceiling: ₹2,000"}
+                            </span>
                           </div>
                           <div
                             className={`h-1.5 overflow-hidden rounded-full ${
@@ -840,11 +912,17 @@ export default function Home() {
                             }`}
                           >
                             <div
-                              className="h-full rounded-full bg-emerald-400"
+                              className={`h-full rounded-full ${
+                                product.purchase_allowed
+                                  ? "bg-emerald-400"
+                                  : "bg-rose-400"
+                              }`}
                               style={{
                                 width: `${Math.min(
                                   100,
-                                  (product.price / 2000) * 100
+                                  (product.price /
+                                    (product.buyer_budget || 2000)) *
+                                    100
                                 )}%`,
                               }}
                             />
@@ -852,12 +930,19 @@ export default function Home() {
                         </div>
                       </div>
 
+                      {/* Buy Button with Disabled State on Policy Breach */}
                       <button
                         disabled={!product.purchase_allowed}
                         onClick={() => setSelectedProduct(product)}
-                        className="mt-5 w-full rounded-xl bg-slate-950 py-3.5 text-sm font-semibold text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-black"
+                        className={`mt-5 w-full rounded-xl py-3.5 text-sm font-semibold transition ${
+                          product.purchase_allowed
+                            ? "bg-slate-950 text-white hover:opacity-80 dark:bg-white dark:text-black cursor-pointer"
+                            : "bg-neutral-800 text-neutral-500 cursor-not-allowed opacity-60 dark:bg-white/10 dark:text-neutral-500"
+                        }`}
                       >
-                        Buy with AI →
+                        {product.purchase_allowed
+                          ? "Buy with AI →"
+                          : "Purchase Blocked by Policy"}
                       </button>
                     </div>
                   );
@@ -1097,18 +1182,37 @@ export default function Home() {
                 </span>
               </div>
               <div className="mt-5 flex justify-between">
-                <span className="text-sm text-slate-500">Spending limit</span>
-                <span className="text-sm text-emerald-400">₹2,000 ✓</span>
+                <span className="text-sm text-slate-500">
+                  {selectedProduct.buyer_budget ? "Requested Budget" : "Spending limit"}
+                </span>
+                <span className="text-sm text-emerald-400">
+                  ₹{(selectedProduct.buyer_budget || 2000).toLocaleString("en-IN")} ✓
+                </span>
               </div>
             </div>
 
-            <div className="mt-5 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4">
-              <div className="flex items-center gap-2 text-sm text-emerald-400">
-                <span>✓</span>
-                Policy check passed
+            {/* Modal Policy Decision Confirmation */}
+            <div
+              className={`mt-5 rounded-xl border p-4 ${
+                selectedProduct.purchase_allowed
+                  ? "border-emerald-400/15 bg-emerald-400/[0.04]"
+                  : "border-rose-400/15 bg-rose-400/[0.04]"
+              }`}
+            >
+              <div
+                className={`flex items-center gap-2 text-sm ${
+                  selectedProduct.purchase_allowed
+                    ? "text-emerald-400"
+                    : "text-rose-400"
+                }`}
+              >
+                <span>{selectedProduct.purchase_allowed ? "✓" : "×"}</span>
+                {selectedProduct.purchase_allowed
+                  ? "Policy check passed"
+                  : "Policy check blocked"}
               </div>
-              <p className="mt-2 text-xs leading-5 text-slate-500">
-                The purchase is within your configured spending limit.
+              <p className="mt-2 text-xs leading-5 text-slate-400 font-mono">
+                {selectedProduct.policy_reason}
               </p>
             </div>
 
@@ -1122,10 +1226,14 @@ export default function Home() {
               </button>
               <button
                 onClick={approvePurchase}
-                disabled={approvalLoading}
-                className="flex-1 rounded-xl bg-white py-3 text-sm font-semibold text-black transition hover:bg-slate-200 disabled:opacity-50"
+                disabled={approvalLoading || !selectedProduct.purchase_allowed}
+                className="flex-1 rounded-xl bg-white py-3 text-sm font-semibold text-black transition hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {approvalLoading ? "Preparing..." : "Approve & Pay"}
+                {approvalLoading
+                  ? "Preparing..."
+                  : selectedProduct.purchase_allowed
+                  ? "Approve & Pay"
+                  : "Blocked"}
               </button>
             </div>
           </div>

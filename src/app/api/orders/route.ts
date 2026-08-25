@@ -4,7 +4,7 @@ import { checkPurchasePolicy } from "@/lib/purchase-policy";
 
 export async function POST(request: Request) {
   try {
-    const { sku, price, approved, productName, query, category } = await request.json();
+    const { sku, price, approved, productName, query, category, buyerBudget, stock, purchaseAllowed } = await request.json();
 
     if (!sku || typeof price !== "number") {
       return NextResponse.json({ error: "SKU and price are required" }, { status: 400 });
@@ -17,10 +17,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const policy = checkPurchasePolicy(price);
+    // Strict server-side policy re-evaluation
+    const policy = checkPurchasePolicy(
+      price,
+      buyerBudget,
+      typeof stock === "number" ? stock : 1,
+      purchaseAllowed !== false
+    );
+
     if (!policy.allowed) {
       return NextResponse.json(
-        { error: policy.reason, purchase_allowed: false },
+        {
+          error: policy.reason,
+          purchase_allowed: false,
+          halted: true,
+        },
         { status: 403 }
       );
     }
