@@ -1,6 +1,25 @@
 {
   "transactions": [
     {
+      "orderId": "BLOCKED_1787677213699",
+      "paymentId": "BLOCKED_1787677213699",
+      "signature": "EXECUTION_HALTED",
+      "sku": "BAG-001",
+      "productName": "Waterproof Laptop Backpack",
+      "category": "Backpacks",
+      "amount": 1499,
+      "currency": "INR",
+      "query": "Find me a laptop backpack under ₹1,000",
+      "agentId": "agent_live",
+      "policyResult": "Blocked",
+      "policyReason": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "approvalStatus": "Not required",
+      "paymentStatus": "Not created",
+      "status": "Policy Blocked",
+      "id": "TXN-2026-00009",
+      "createdAt": "2026-08-25T17:00:13.723Z"
+    },
+    {
       "orderId": "BLOCKED_1787589829339",
       "paymentId": "BLOCKED_1787589829339",
       "signature": "EXECUTION_HALTED",
@@ -154,6 +173,33 @@
     }
   ],
   "activities": [
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Blocked",
+      "request": "Find me a laptop backpack under ₹1,000",
+      "productMatched": "Waterproof Laptop Backpack",
+      "productsReturned": 5,
+      "amount": 1499,
+      "policy": "Blocked",
+      "resultText": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "reason": "Product price (₹1499) exceeds buyer requested maximum (₹1000).",
+      "id": "ACT-13695",
+      "createdAt": "2026-08-25T17:00:13.695Z"
+    },
+    {
+      "agentName": "AI Buyer",
+      "agentId": "agent_live",
+      "type": "Discovery",
+      "request": "Find me a waterproof laptop backpack under ₹2,000",
+      "productMatched": "Waterproof Laptop Backpack",
+      "productsReturned": 2,
+      "amount": 1499,
+      "policy": "Passed",
+      "resultText": "2 product(s) discovered",
+      "id": "ACT-91001",
+      "createdAt": "2026-08-25T16:59:51.001Z"
+    },
     {
       "agentName": "AI Buyer",
       "agentId": "agent_live",
@@ -414,7 +460,7 @@
       "createdAt": "2026-08-21T18:11:11.161Z"
     }
   ],
-  "totalQueries": 21,
-  "totalProductsDiscovered": 19,
-  "totalPolicyChecks": 16
+  "totalQueries": 23,
+  "totalProductsDiscovered": 26,
+  "totalPolicyChecks": 18
 }
